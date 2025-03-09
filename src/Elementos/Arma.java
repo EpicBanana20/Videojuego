@@ -1,0 +1,73 @@
+package Elementos;
+
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.awt.geom.AffineTransform;
+import Juegos.Juego;
+import Utilz.LoadSave;
+
+public abstract class Arma {
+    protected BufferedImage sprite;
+    protected float x, y;
+    protected float offsetDistance; // Distancia desde el centro del jugador
+    protected float rotacion; // En grados
+    protected String nombre;
+
+    private float[] positionResult = new float[2];
+    
+    public Arma(String spritePath, float offsetDistance) {
+        this.sprite = LoadSave.GetSpriteAtlas(spritePath);
+        this.offsetDistance = offsetDistance;
+    }
+
+    public void update(float playerX, float playerY, AimController aimController) {
+        // Usar directamente el ángulo calculado por AimController
+        rotacion = aimController.getAngleDeg();
+        
+        // Usar el método de AimController para calcular la posición del arma
+        AimController.getPositionAtDistance(
+            playerX, playerY, 
+            offsetDistance, 
+            aimController.getAngleRad(), 
+            positionResult
+        );
+        
+        // Actualizar posición
+        x = positionResult[0];
+        y = positionResult[1];
+    }
+
+    public void render(Graphics g, int xLvlOffset) {
+        Graphics2D g2d = (Graphics2D) g;
+        
+        // IMPORTANTE: Guardar la transformación original
+        AffineTransform originalTransform = g2d.getTransform();
+        
+        try {
+            // Calcular el centro de rotación
+            int centerX = (int)(x - xLvlOffset);
+            int centerY = (int)y;
+            
+            // En lugar de reemplazar, aplicamos una transformación adicional
+            g2d.translate(centerX, centerY);
+            g2d.rotate(Math.toRadians(rotacion));
+            
+            // Dibujar el sprite centrado
+            int halfWidth = sprite.getWidth() / 2;
+            int halfHeight = sprite.getHeight() / 2;
+            g2d.drawImage(sprite, -halfWidth, -halfHeight, null);
+            
+        } finally {
+            // CRÍTICO: Siempre restaurar la transformación original
+            g2d.setTransform(originalTransform);
+        }
+        
+        // Para depuración - dibujar un punto donde debería estar el centro del arma
+        // g2d.setColor(Color.RED);
+        // g2d.fillOval((int)(x - xLvlOffset) - 2, (int)y - 2, 4, 4);
+    }
+    
+    // Métodos que se implementarán en clases derivadas
+    public abstract void disparar();
+}
