@@ -106,6 +106,7 @@ g.drawString("AimX: " + AimController.getAimedX() + ", AimY: " + AimController.g
                 (int) (hitbox.x - xDrawOffset)-xlvlOffset, (int) (hitbox.y - yDrawOffset),
                 w, h, null);
         renderAim(g, xlvlOffset);
+        armaActual.render(g, xlvlOffset);
     }
 
     private void actualizaAnim() {

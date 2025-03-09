@@ -22,23 +22,21 @@ public abstract class Arma {
     }
 
     public void update(float playerX, float playerY, AimController aimController) {
-        // Usar directamente el ángulo calculado por AimController
         rotacion = aimController.getAngleDeg();
-        
-        // Usar el método de AimController para calcular la posición del arma
+
         AimController.getPositionAtDistance(
             playerX, playerY, 
             offsetDistance, 
             aimController.getAngleRad(), 
             positionResult
         );
-        
-        // Actualizar posición
+
         x = positionResult[0];
         y = positionResult[1];
     }
 
     public void render(Graphics g, int xLvlOffset) {
+        
         Graphics2D g2d = (Graphics2D) g;
         
         // IMPORTANTE: Guardar la transformación original

@@ -9,7 +9,7 @@ public class MachineGun extends Arma {
     private int tiempoRecarga = 5; // Frames entre disparos
     
     public MachineGun() {
-        super("MachineGun.png", 5 * Juegos.Juego.SCALE); // Offset de 5 píxeles
+        super("machinegun.png", 30 * Juegos.Juego.SCALE); // Offset de 5 píxeles
         this.nombre = "MachineGun";
     }
     
