@@ -7,9 +7,9 @@ public class MachineGun extends Arma {
     private int cadenciaDisparo = 10; // Disparos por segundo
     private int contadorRecarga = 0;
     private int tiempoRecarga = 5; // Frames entre disparos
-    
+
     public MachineGun() {
-        super("machinegun.png", 30 * Juegos.Juego.SCALE); // Offset de 5 píxeles
+        super("machinegun.png", 30 * Juegos.Juego.SCALE, 3.0f); // Offset de 5 píxeles
         this.nombre = "MachineGun";
     }
     

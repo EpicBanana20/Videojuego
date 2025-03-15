@@ -3,22 +3,20 @@ package Elementos;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-/*import java.io.IOException;
-import java.io.InputStream;
-import javax.imageio.ImageIO;*/
 
 import Juegos.Juego;
 import Utilz.LoadSave;
+import Utilz.Animaciones; // Importamos la nueva clase
 
 import static Utilz.Constantes.ConstanteJugador.*;
-//import static Utilz.Constantes.Direccion.*;
 import static Utilz.MetodoAyuda.*;
 
 public class Jugador extends Cascaron {
-    private BufferedImage[][] idleAni;
-    private int animInd, animTick = 0, animSpeed = 15;
-    private int playerAction = INACTIVO;
-    // private int playerDirec = -1;
+    // Reemplazamos las variables de animación por una instancia de Animaciones
+    private Animaciones animaciones;
+    private BufferedImage[][] spritesJugador; // Mantenemos esto para cargar los sprites
+    
+    // Dejamos el resto de variables como estaban
     private boolean moving = false;
     private boolean attacking = false;
     private boolean left, right, down, up, jump;
@@ -40,12 +38,10 @@ public class Jugador extends Cascaron {
 
     // Armas
     private Elementos.Armas.MachineGun armaActual;
-    //FIN DECLARACIÓN DE VARIABLES
-    //INICIO DE FUNCIONES
 
     public Jugador(float x, float y, int w, int h) {
         super(x, y, w, h);
-        loadAnimation();
+        loadAnimation();  // Cargamos las animaciones
         initHitBox(x, y, 20 * Juego.SCALE, 27 * Juego.SCALE);
         aimController = new AimController(200* Juego.SCALE);
         armaActual = new Elementos.Armas.MachineGun();
@@ -75,24 +71,47 @@ public class Jugador extends Cascaron {
             (int)aimX, 
             (int)aimY
         );
-
-        // En tu método renderAim, añade:
-g.setColor(Color.YELLOW);
-g.drawString("MouseX: " + currentMouseX + ", MouseY: " + currentMouseY, 10, 20);
-g.drawString("AimX: " + AimController.getAimedX() + ", AimY: " + AimController.getAimedY(), 10, 40);
     }
 
-    // FIN FUNCIONES DE MOUSE
     public void update(int xlvlOffset) {
-        aimController.update(getXCenter() - xlvlOffset,getYCenter(), currentMouseX, currentMouseY);
+        aimController.update(getXCenter() - xlvlOffset, getYCenter(), currentMouseX, currentMouseY);
         armaActual.update(getXCenter(), getYCenter(), aimController);
-        actualizaAnim();
-        colocarAnim();
+        
+        // Actualizamos las animaciones usando nuestra nueva clase
+        animaciones.actualizarAnimacion();
+        
+        // Actualizamos qué animación mostrar basado en el estado del jugador
+        determinarAnimacion();
+        
         actuPosicion();
     }
 
     public void update() {
         update(0);
+    }
+
+    // Nuevo método para determinar qué animación mostrar
+    private void determinarAnimacion() {
+        int nuevaAnimacion = INACTIVO; // Por defecto, estamos inactivos
+        
+        if (moving) {
+            nuevaAnimacion = CORRER;
+        }
+        
+        if (inAir) {
+            if (airSpeed < 0) {
+                nuevaAnimacion = SALTAR;
+            } else {
+                nuevaAnimacion = CAYENDO;
+            }
+        }
+        
+        if (attacking) {
+            nuevaAnimacion = ATACAR1;
+        }
+        
+        // Configuramos la nueva acción en el objeto de animaciones
+        animaciones.setAccion(nuevaAnimacion);
     }
 
     public void loadLvlData(int[][] lvlData) {
@@ -102,24 +121,13 @@ g.drawString("AimX: " + AimController.getAimedX() + ", AimY: " + AimController.g
     }
 
     public void render(Graphics g, int xlvlOffset) {
-        g.drawImage(idleAni[playerAction][animInd],
+        // Usamos la clase Animaciones para obtener la imagen actual
+        g.drawImage(animaciones.getImagenActual(),
                 (int) (hitbox.x - xDrawOffset)-xlvlOffset, (int) (hitbox.y - yDrawOffset),
                 w, h, null);
+                
         renderAim(g, xlvlOffset);
         armaActual.render(g, xlvlOffset);
-    }
-
-    private void actualizaAnim() {
-        animTick++;
-        if (animTick >= animSpeed) {
-            animTick = 0;
-            animInd++;
-            if (animInd >= GetNoSprite(playerAction))
-            {    animInd = 0;
-                attacking=false;
-            }    
-        }
-
     }
 
     private void actuPosicion() {
@@ -136,7 +144,7 @@ g.drawString("AimX: " + AimController.getAimedX() + ", AimY: " + AimController.g
         if (right)
             xSpeed += playerSpeed;
     
-        // 🔴 Modificación: Verificar si está en el suelo ANTES de activar inAir
+        // Verificar si está en el suelo ANTES de activar inAir
         boolean enSuelo = isEntityOnFloor(hitbox, lvlData);
         
         if (!inAir && !enSuelo)
@@ -150,7 +158,7 @@ g.drawString("AimX: " + AimController.getAimedX() + ", AimY: " + AimController.g
             } else {
                 hitbox.y = GetEntityYPosUnderRoofOrAboveFloor(hitbox, airSpeed);
     
-                // 🔴 Corregido: Solo desactivar inAir si realmente está tocando el suelo
+                // Solo desactivar inAir si realmente está tocando el suelo
                 if (enSuelo) {
                     resetInAir();
                 } else {
@@ -165,7 +173,7 @@ g.drawString("AimX: " + AimController.getAimedX() + ", AimY: " + AimController.g
             updateXPos(xSpeed);
         }
     
-        // 🔴 Nueva condición: Si el personaje está en el suelo después de moverse, quitar inAir
+        // Si el personaje está en el suelo después de moverse, quitar inAir
         if (isEntityOnFloor(hitbox, lvlData)) {
             inAir = false;
         }
@@ -173,8 +181,6 @@ g.drawString("AimX: " + AimController.getAimedX() + ", AimY: " + AimController.g
         moving = true;
     }
     
-    
-
     private void jump() {
         if(inAir)
          return;
@@ -188,58 +194,38 @@ g.drawString("AimX: " + AimController.getAimedX() + ", AimY: " + AimController.g
             hitbox.x += xSpeed;
         else {
             hitbox.x = GetEntityXPosNexttoWall(hitbox, xSpeed);
-            /*if (airSpeed > 0)
-                resetInAir();*/
         }
     }
 
     private void resetInAir() {
         inAir = false;
         airSpeed = 0;
-
-    }
-
-    private void colocarAnim() {
-        int starAnim = playerAction;
-        if (moving)
-            playerAction = CORRER;
-        else
-            playerAction = INACTIVO;
-        if(inAir){
-            if(airSpeed<0)
-                playerAction=SALTAR;
-            else
-                playerAction=CAYENDO;
-        }
-        if (attacking)
-            playerAction = ATACAR1;
-        if (starAnim != playerAction)
-            resetAnimTick();
-    }
-
-    public boolean isJump() {
-        return jump;
-    }
-
-    public void setJump(boolean jump) {
-        this.jump = jump;
-    }
-
-    private void resetAnimTick() {
-        this.animTick = 0;
-        animInd = 0;
     }
 
     private void loadAnimation() {
+        // Cargamos los sprites como antes
         BufferedImage img = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_ATLAS);
-        idleAni = new BufferedImage[9][6];
-        for (int i = 0; i < idleAni.length; i++)
-            for (int j = 0; j < idleAni[i].length; j++)
-                idleAni[i][j] = img.getSubimage(j * 64, i * 40, 64, 40);
+        spritesJugador = new BufferedImage[9][6];
+        for (int i = 0; i < spritesJugador.length; i++)
+            for (int j = 0; j < spritesJugador[i].length; j++)
+                spritesJugador[i][j] = img.getSubimage(j * 64, i * 40, 64, 40);
 
+        // Creamos la instancia de Animaciones con los sprites cargados
+        animaciones = new Animaciones(spritesJugador);
+        
+        // Configuramos manualmente la cantidad correcta de frames para cada animación
+        // Aplicamos directamente la configuración para cada tipo de animación
+        animaciones.setNumFramesPorAnimacion(INACTIVO, GetNoSprite(INACTIVO));
+        animaciones.setNumFramesPorAnimacion(CORRER, GetNoSprite(CORRER));
+        animaciones.setNumFramesPorAnimacion(SALTAR, GetNoSprite(SALTAR));
+        animaciones.setNumFramesPorAnimacion(CAYENDO, GetNoSprite(CAYENDO));
+        animaciones.setNumFramesPorAnimacion(AGACHAR, GetNoSprite(AGACHAR));
+        animaciones.setNumFramesPorAnimacion(GOLPEAR, GetNoSprite(GOLPEAR));
+        animaciones.setNumFramesPorAnimacion(ATACAR1, GetNoSprite(ATACAR1));
+        animaciones.setNumFramesPorAnimacion(ATACAR_BRINCAR1, GetNoSprite(ATACAR_BRINCAR1));
+        animaciones.setNumFramesPorAnimacion(ATACAR_BRINCAR2, GetNoSprite(ATACAR_BRINCAR2));
     }
 
-    //FIN FUNCIONES
     //GETTERS Y SETTERS
     public void setMoving(boolean moving) {
         this.moving = moving;
@@ -284,6 +270,10 @@ g.drawString("AimX: " + AimController.getAimedX() + ", AimY: " + AimController.g
     public void setAttacking(boolean attacking) {
         this.attacking = attacking;
     }
+    
+    public boolean isAttacking() {
+        return attacking;
+    }
 
     public float getXCenter() {
         return hitbox.x + hitbox.width / 2f;
@@ -293,4 +283,7 @@ g.drawString("AimX: " + AimController.getAimedX() + ", AimY: " + AimController.g
         return hitbox.y + hitbox.height / 2f;
     }
 
+    public void setJump(boolean jump) {
+        this.jump = jump;
+    }
 }
