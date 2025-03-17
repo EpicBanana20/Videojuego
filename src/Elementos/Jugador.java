@@ -76,7 +76,8 @@ public class Jugador extends Cascaron {
     public void update(int xlvlOffset) {
         aimController.update(getXCenter() - xlvlOffset, getYCenter(), currentMouseX, currentMouseY);
         armaActual.update(getXCenter(), getYCenter(), aimController);
-        
+        if(attacking)
+            armaActual.disparar();
         // Actualizamos las animaciones usando nuestra nueva clase
         animaciones.actualizarAnimacion();
         

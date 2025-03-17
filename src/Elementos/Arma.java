@@ -15,6 +15,7 @@ public abstract class Arma {
     protected String nombre;
     protected float escala = 1.0f;
     protected boolean apuntadoIzquierda = false;
+    protected AdministradorBalas adminBalas;
 
     private float[] positionResult = new float[2];
 
@@ -22,6 +23,7 @@ public abstract class Arma {
         this.sprite = LoadSave.GetSpriteAtlas(spritePath);
         this.offsetDistance = offsetDistance;
         this.escala = escala;
+        this.adminBalas = new AdministradorBalas();
     }
 
     public void update(float playerX, float playerY, AimController aimController) {
@@ -37,6 +39,8 @@ public abstract class Arma {
 
         x = positionResult[0];
         y = positionResult[1];
+
+        adminBalas.update();
     }
 
     public void render(Graphics g, int xLvlOffset) {
@@ -67,6 +71,8 @@ public abstract class Arma {
             // CRÍTICO: Siempre restaurar la transformación original
             g2d.setTransform(originalTransform);
         }
+
+        adminBalas.render(g, xLvlOffset);
     }
 
     // Métodos que se implementarán en clases derivadas
@@ -83,5 +89,9 @@ public abstract class Arma {
 
     public String getNombre() {
         return nombre;
+    }
+    
+    public AdministradorBalas getAdminBalas() {
+        return adminBalas;
     }
 }
