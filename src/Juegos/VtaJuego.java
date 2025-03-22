@@ -8,10 +8,10 @@ import javax.swing.JFrame;
 public class VtaJuego extends JFrame {
 
     public VtaJuego(PanelJuego n){
-        //setSize(400, 400);
+        setSize(400, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
-        //this.add(n);
+        this.add(n);
         this.setVisible(true);
         this.addWindowFocusListener(new WindowFocusListener() {
 
