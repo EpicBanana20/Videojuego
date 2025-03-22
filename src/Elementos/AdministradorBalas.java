@@ -39,7 +39,8 @@ public class AdministradorBalas {
     
     // Renderizar todas las balas
     public void render(Graphics g, int xLvlOffset) {
-        for (Bala bala : balas) {
+        ArrayList<Bala> balasSeguras = new ArrayList<>(balas);
+        for (Bala bala : balasSeguras) {
             bala.render(g, xLvlOffset);
         }
     }

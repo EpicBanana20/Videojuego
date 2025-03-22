@@ -6,7 +6,7 @@ import Juegos.Juego;
 import Elementos.AimController;
 
 public class MachineGun extends Arma {
-    private int cadenciaDisparo = 10; // Disparos por segundo
+    private int cadenciaDisparo = 1; // Disparos por segundo
     private int contadorRecarga = 0;
     private int tiempoRecarga = 5; // Frames entre disparos
 

@@ -7,7 +7,7 @@ import Juegos.Juego;
 public class Bala extends Cascaron {
     // Propiedades específicas de la bala
     private float velocidadX, velocidadY;
-    private float velocidad = 8.0f * Juego.SCALE; // Velocidad base de la bala
+    private float velocidad = 2.0f * Juego.SCALE; // Velocidad base de la bala
     private boolean activa = true; // Indica si la bala está activa o debe eliminarse
     private int daño = 10; // Daño que causa la bala
     

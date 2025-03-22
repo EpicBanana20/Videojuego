@@ -30,7 +30,6 @@ public abstract class Arma {
         rotacion = aimController.getAngleRad();
 
         apuntadoIzquierda = (aimController.getAngleDeg() > 90 || aimController.getAngleDeg() < -90);
-        System.out.println(aimController.getAngleDeg());
         AimController.getPositionAtDistance(
                 playerX, playerY,
                 offsetDistance,
